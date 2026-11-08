@@ -1738,10 +1738,12 @@
         '    var s = new Error().stack || "";',
         '    if (/\\n\\s+at\\s+/.test(s)) isV8 = true;',
         '  } catch(err) {}',
+        '  var isEdge = /Edg|Edge/i.test(ua) || /Microsoft Edge|Edge/i.test(brands);',
         '  var isChrome = (isChromiumUA || isV8) && !isBrave;',
         '  if (isChrome && !isAuth) {',
         '    rawCipher = null;',
-        '    self.postMessage({ blocked: true, isChrome: true, reason: "Using Chrome." });',
+        '    var rMsg = isEdge ? "Using Edge." : "Using Chrome.";',
+        '    self.postMessage({ blocked: true, isChrome: true, reason: rMsg });',
         '    return;',
         '  }',
         '  try {',
@@ -1887,7 +1889,8 @@
         var isChromeEngine = (hasV8Stack || hasBlinkAPIs || hasChromeUA || hasChromiumBrand || hasChromeObj || isEdgeAgent || (workerVerdict && workerVerdict.isChrome)) && !isGenuineBrave;
 
         if (isChromeEngine) {
-          return { blocked: true, isChrome: true, reason: 'Using Chrome.' };
+          var blockReason = isEdgeAgent ? 'Using Edge.' : 'Using Chrome.';
+          return { blocked: true, isChrome: true, reason: blockReason };
         }
 
         // Check H: Known AI Crawlers & Scrapers
