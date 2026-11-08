@@ -1741,7 +1741,7 @@
         '  var isChrome = (isChromiumUA || isV8) && !isBrave;',
         '  if (isChrome && !isAuth) {',
         '    rawCipher = null;',
-        '    self.postMessage({ blocked: true, isChrome: true, reason: "Using Chrome (Worker Engine Signature Verified)." });',
+        '    self.postMessage({ blocked: true, isChrome: true, reason: "Using Chrome." });',
         '    return;',
         '  }',
         '  try {',
@@ -1887,13 +1887,7 @@
         var isChromeEngine = (hasV8Stack || hasBlinkAPIs || hasChromeUA || hasChromiumBrand || hasChromeObj || isEdgeAgent || (workerVerdict && workerVerdict.isChrome)) && !isGenuineBrave;
 
         if (isChromeEngine) {
-          var blockReason = 'Using Chrome.';
-          if (isEdgeAgent) {
-            blockReason = 'Using MS Edge Agent.';
-          } else if (isSpoofing) {
-            blockReason = 'Using Chrome (Spoofed User-Agent).';
-          }
-          return { blocked: true, isChrome: true, reason: blockReason };
+          return { blocked: true, isChrome: true, reason: 'Using Chrome.' };
         }
 
         // Check H: Known AI Crawlers & Scrapers
