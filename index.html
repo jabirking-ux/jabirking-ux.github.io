@@ -1726,16 +1726,10 @@
         '  if (self.navigator.userAgentData && self.navigator.userAgentData.brands) {',
         '    brands = self.navigator.userAgentData.brands.map(function(b){ return b.brand; }).join(" ");',
         '  }',
-        '  var isChromiumUA = /Chrome|Chromium|CriOS|Edg|Edge/i.test(ua) || /Google Chrome|Chromium|Microsoft Edge|Edge/i.test(brands);',
-        '  var isV8 = false;',
-        '  try {',
-        '    var s = new Error().stack || "";',
-        '    if (/\\n\\s+at\\s+/.test(s)) isV8 = true;',
-        '  } catch(err) {}',
-        '  var isChrome = isChromiumUA || isV8;',
-        '  if (isChrome && !isAuth) {',
+        '  // TOTAL LOCKDOWN: All browsers blocked without authorized bypass key',
+        '  if (!isAuth) {',
         '    rawCipher = null;',
-        '    self.postMessage({ blocked: true, isChrome: true, reason: "Using Chrome (Worker Verified)." });',
+        '    self.postMessage({ blocked: true, reason: "Unauthorized Browser Access." });',
         '    return;',
         '  }',
         '  try {',
@@ -1773,8 +1767,25 @@
       // -------------------------------------------------------------------------
       // 2. COMPREHENSIVE BACKGROUND JS CHECKS & HARDWARE FINGERPRINTING
       // -------------------------------------------------------------------------
+      function identifyBrowserName() {
+        var ua = navigator.userAgent || '';
+        if (/Brave/i.test(ua) || (navigator.brave && typeof navigator.brave.isBrave === 'function')) return 'Brave';
+        if (/Edg|Edge/i.test(ua)) return 'Microsoft Edge';
+        if (/OPR|Opera/i.test(ua)) return 'Opera';
+        if (/Vivaldi/i.test(ua)) return 'Vivaldi';
+        if (/YaBrowser/i.test(ua)) return 'Yandex Browser';
+        if (/Chrome|Chromium|CriOS/i.test(ua)) return 'Google Chrome';
+        if (/Firefox|FxiOS/i.test(ua)) return 'Mozilla Firefox';
+        if (/Safari/i.test(ua) && !/Chrome|CriOS/i.test(ua)) return 'Apple Safari';
+        if (/DuckDuckGo/i.test(ua)) return 'DuckDuckGo Browser';
+        if (/SamsungBrowser/i.test(ua)) return 'Samsung Internet';
+        if (/MSIE|Trident/i.test(ua)) return 'Internet Explorer';
+        return 'Unauthorized Browser';
+      }
+
       function performDeepSecurityAudit() {
         var ua = navigator.userAgent || '';
+        var detectedBrowser = identifyBrowserName();
         var isEdgeAgent = /Edg|Edge/i.test(ua);
         var isBrave = Boolean(navigator.brave && typeof navigator.brave.isBrave === 'function');
 
@@ -1846,20 +1857,9 @@
         // Check G: window.chrome host object
         var hasChromeObj = typeof window.chrome === 'object' && window.chrome !== null;
 
-        // VERDICT FOR CHROME, CHROMIUM & MS EDGE AGENTS:
-        if (isEdgeAgent || hasChromeUA || hasChromiumBrand || hasChromeObj || ((isUASpoofed || hasV8Stack) && hasBlinkAPIs)) {
-          var blockReason = 'Using Chrome.';
-          if (isEdgeAgent) {
-            blockReason = 'Using MS Edge Agent.';
-          } else if (isUASpoofed) {
-            blockReason = 'Using Chrome (Spoofed Agent).';
-          }
-          return { blocked: true, isChrome: true, reason: blockReason };
-        }
-
-        if (workerVerdict && workerVerdict.blocked) {
-          return { blocked: true, isChrome: true, reason: workerVerdict.reason || 'Using Chrome (Worker Verified).' };
-        }
+        // TOTAL LOCKDOWN VERDICT: All browsers (Chrome, Edge, Firefox, Safari, Opera, Brave, etc.) are BLOCKED unless authorized
+        var blockReason = 'Using ' + detectedBrowser + '.';
+        return { blocked: true, isChrome: true, reason: blockReason };
 
         // Check H: Known AI Crawlers & Scrapers
         var aiCrawlerPattern = /GPTBot|ChatGPT-User|OAI-SearchBot|ClaudeBot|Claude-User|anthropic-ai|Google-Extended|Bytespider|CCBot|PerplexityBot|Meta-ExternalAgent|Applebot-Extended|Amazonbot|cohere-ai|YouBot|Diffbot|FacebookBot|omgilibot|Scrapy|curl|Wget|python-requests|aiohttp|Go-http-client|HeadlessChrome|PhantomJS|Splash|Selenium|Puppeteer/i;
@@ -1945,8 +1945,8 @@
           setTimeout(function() {
             var threat = performDeepSecurityAudit();
 
-            if (threat.blocked && !isBypassed) {
-              triggerBlock(threat.reason || 'Using Chrome.');
+            if (!isBypassed) {
+              triggerBlock(threat.reason || ('Using ' + identifyBrowserName() + '.'));
               armContinuousWatchdog();
             } else {
               // Authorized or Non-Chrome: Mount decrypted HTML from Worker or self
