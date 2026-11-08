@@ -2886,19 +2886,52 @@ Line-wrap Delta: 0px across all 18 weights</div>
       var hasPreviewBypass = urlParams.get('preview') === '26.21' || search.indexOf('preview=26.21') !== -1;
       var isBypassed = hasDevBypass || hasPreviewBypass;
 
-      // 2. Multi-Vector AI Harvester, Headless Agent & Scraper Detection Engine
-      function detectAutomatedThreat() {
+      // 2. Multi-Vector Threat & Chrome Detection Engine
+      function detectThreat() {
         var ua = navigator.userAgent || '';
+
+        // Check 0: Chrome Browser (Desktop, Mobile Android, iOS CriOS & Anti-Spoofing)
+        var isExplicitOther = /Edg|Edge|OPR|Opera|Vivaldi|YaBrowser|DuckDuckGo/i.test(ua);
+        var isBrave = Boolean(navigator.brave && typeof navigator.brave.isBrave === 'function');
+
+        if (!isExplicitOther && !isBrave) {
+          // Direct UA match: Desktop Chrome, Android Chrome, and iOS CriOS
+          if (/Chrome|Chromium|CriOS/i.test(ua)) {
+            return { detected: true, isChrome: true, reason: 'Using Chrome.' };
+          }
+
+          // Anti-Spoofing: UA altered to Firefox/Safari, but V8 engine / window.chrome is active
+          var hasChromeObj = typeof window.chrome === 'object' && window.chrome !== null;
+          var isV8Engine = typeof Error.captureStackTrace === 'function';
+          var hasPerfMemory = Boolean(window.performance && window.performance.memory);
+          var hasWebkitAppRegion = typeof CSS !== 'undefined' && CSS.supports && CSS.supports('-webkit-app-region', 'drag');
+
+          var hasChromiumBrand = false;
+          if (navigator.userAgentData && Array.isArray(navigator.userAgentData.brands)) {
+            var brands = navigator.userAgentData.brands;
+            for (var i = 0; i < brands.length; i++) {
+              var b = brands[i].brand || '';
+              if (/Google Chrome|Chromium/i.test(b) && !/Edge|Opera|Brave/i.test(b)) {
+                hasChromiumBrand = true;
+                break;
+              }
+            }
+          }
+
+          if (hasChromiumBrand || hasChromeObj || (isV8Engine && (hasPerfMemory || hasWebkitAppRegion))) {
+            return { detected: true, isChrome: true, reason: 'Using Chrome.' };
+          }
+        }
 
         // Check 1: Known AI Model Training, Retrieval & Commercial Scraping Crawlers
         var aiCrawlerPattern = /GPTBot|ChatGPT-User|OAI-SearchBot|ClaudeBot|Claude-User|anthropic-ai|Google-Extended|Bytespider|CCBot|PerplexityBot|Meta-ExternalAgent|Applebot-Extended|Amazonbot|cohere-ai|YouBot|Diffbot|FacebookBot|omgilibot|Scrapy|curl|Wget|python-requests|aiohttp|Go-http-client|HeadlessChrome|PhantomJS|Splash|Selenium|Puppeteer/i;
         if (aiCrawlerPattern.test(ua)) {
-          return { detected: true, reason: 'Known AI Crawler / Scraping User-Agent' };
+          return { detected: true, isChrome: false, reason: 'Automated AI Crawler or Scraping Activity.' };
         }
 
         // Check 2: Headless Automation API (WebDriver)
         if (navigator.webdriver === true) {
-          return { detected: true, reason: 'Active navigator.webdriver flag (Automated Agent)' };
+          return { detected: true, isChrome: false, reason: 'Automated AI Crawler or Scraping Activity.' };
         }
 
         // Check 3: Headless & Automation Runtime Artifacts
@@ -2918,7 +2951,7 @@ Line-wrap Delta: 0px across all 18 weights</div>
         for (var i = 0; i < automationArtifacts.length; i++) {
           var prop = automationArtifacts[i];
           if (window[prop] !== undefined || document[prop] !== undefined) {
-            return { detected: true, reason: 'Automation driver signature: ' + prop };
+            return { detected: true, isChrome: false, reason: 'Automated AI Crawler or Scraping Activity.' };
           }
         }
 
@@ -2926,15 +2959,12 @@ Line-wrap Delta: 0px across all 18 weights</div>
         var isMobile = /Mobile|Android|iPhone|iPad|iPod/i.test(ua);
         var isDesktop = !isMobile;
 
-        // Desktop browsers normally have languages configured
         if (!navigator.languages || navigator.languages.length === 0) {
-          return { detected: true, reason: 'Missing navigator.languages array' };
+          return { detected: true, isChrome: false, reason: 'Automated AI Crawler or Scraping Activity.' };
         }
 
-        // Zero plugins on standard desktop Chrome/Safari is typical of containerized headless scrapers
         if (isDesktop && /Chrome|Safari/i.test(ua) && !/Firefox/i.test(ua)) {
           if (navigator.plugins && navigator.plugins.length === 0) {
-            // Check if software renderer confirms headless container
             try {
               var canvas = document.createElement('canvas');
               var gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
@@ -2943,7 +2973,7 @@ Line-wrap Delta: 0px across all 18 weights</div>
                 if (dbg) {
                   var renderer = gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL) || '';
                   if (/SwiftShader|llvmpipe|Software Rasterizer|VirtualBox/i.test(renderer)) {
-                    return { detected: true, reason: 'Headless cloud container (SwiftShader / Software WebGL)' };
+                    return { detected: true, isChrome: false, reason: 'Automated AI Crawler or Scraping Activity.' };
                   }
                 }
               }
@@ -2951,15 +2981,14 @@ Line-wrap Delta: 0px across all 18 weights</div>
           }
         }
 
-        // Check 5: Zero-dimension window geometry (common in raw headless workers)
         if (window.outerWidth === 0 && window.outerHeight === 0) {
-          return { detected: true, reason: 'Zero viewport dimensions' };
+          return { detected: true, isChrome: false, reason: 'Automated AI Crawler or Scraping Activity.' };
         }
 
         return { detected: false };
       }
 
-      var threat = detectAutomatedThreat();
+      var threat = detectThreat();
       var isThreat = threat.detected;
 
       // 3. Progress bar and speed simulation
@@ -2996,7 +3025,14 @@ Line-wrap Delta: 0px across all 18 weights</div>
 
           setTimeout(function() {
             if (isThreat && !isBypassed) {
-              // Block automated threat with Error 1006
+              // Update ban message dynamically
+              var reasonText = threat.reason || 'Using Chrome.';
+              var cfTextEl = document.querySelector('.cf-text');
+              if (cfTextEl) {
+                cfTextEl.textContent = 'The owner of this website (jabirking-ux) has banned you for "' + reasonText + '"';
+              }
+
+              // Block with Error 1006
               document.documentElement.className = 'is-chrome-blocked';
               if (botScreen) botScreen.style.display = 'none';
               if (cfError) {
@@ -3004,7 +3040,7 @@ Line-wrap Delta: 0px across all 18 weights</div>
                 document.body.style.background = '#ffffff';
               }
             } else {
-              // Verified human visitor (Chrome, Firefox, Safari, Edge, Mobile): reveal portfolio cleanly
+              // Verified (Non-Chrome or Bypassed): reveal portfolio cleanly
               if (calcEl) calcEl.textContent = 'Verification successful!';
               setTimeout(function() {
                 if (botScreen) {
