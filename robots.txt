@@ -1,0 +1,121 @@
+# ==============================================================================
+# JABIRKING — COMPREHENSIVE AI CRAWLER & AUTOMATED SCRAPER DENIAL POLICY
+# Standardized Machine-Readable Directive: W3C TDM-Reservation & Robots Exclusion
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# 1. SPECIFIC AI TRAINING & SCRAPING AGENTS (EXPLICIT DENIAL)
+# ------------------------------------------------------------------------------
+
+# OpenAI Crawlers & User Retrieval Agents
+User-agent: GPTBot
+Disallow: /
+
+User-agent: ChatGPT-User
+Disallow: /
+
+User-agent: OAI-SearchBot
+Disallow: /
+
+# Anthropic Claude Crawlers & User Retrieval Agents
+User-agent: ClaudeBot
+Disallow: /
+
+User-agent: Claude-User
+Disallow: /
+
+User-agent: anthropic-ai
+Disallow: /
+
+# Google AI & Gemini Training Harvester
+User-agent: Google-Extended
+Disallow: /
+
+# ByteDance / TikTok AI Scraper
+User-agent: Bytespider
+Disallow: /
+
+# Common Crawl (Foundation Dataset for LLMs)
+User-agent: CCBot
+Disallow: /
+
+# Perplexity AI Scraper & Live Retrieval
+User-agent: PerplexityBot
+Disallow: /
+
+# Meta / Facebook AI Training & Extraction Crawlers
+User-agent: Meta-ExternalAgent
+Disallow: /
+
+User-agent: FacebookBot
+Disallow: /
+
+User-agent: meta-externalagent
+Disallow: /
+
+# Apple Intelligence Training Harvester
+User-agent: Applebot-Extended
+Disallow: /
+
+# Amazon Web & Olympus AI Crawler
+User-agent: Amazonbot
+Disallow: /
+
+# Cohere Foundation Model Crawler
+User-agent: cohere-ai
+Disallow: /
+
+# You.com Search & AI Summary Bot
+User-agent: YouBot
+Disallow: /
+
+# Diffbot Knowledge Graph & AI Scraper
+User-agent: Diffbot
+Disallow: /
+
+# Webhose / Omgili Content Harvester
+User-agent: omgilibot
+Disallow: /
+
+User-agent: omgili
+Disallow: /
+
+# Additional Aggressive Scraping Harvesters
+User-agent: Timpibot
+Disallow: /
+
+User-agent: Kangaroo Bot
+Disallow: /
+
+User-agent: iaskspider/2.0
+Disallow: /
+
+User-agent: ImagesiftBot
+Disallow: /
+
+User-agent: DataForSeoBot
+Disallow: /
+
+User-agent: PetalBot
+Disallow: /
+
+User-agent: Scrapy
+Disallow: /
+
+# ------------------------------------------------------------------------------
+# 2. GENERAL CRAWLER POLICY & PRIVACY RESTRICTIONS
+# ------------------------------------------------------------------------------
+
+User-agent: *
+Disallow: /assets/
+Disallow: /fonts/
+Disallow: /*.woff2$
+Disallow: /*.png$
+Disallow: /*.svg$
+Disallow: /*.json$
+Disallow: /*.lock$
+Crawl-delay: 10
+
+# Text and Data Mining (TDM) Reservation Notice
+# In accordance with Article 4(3) of EU Directive 2019/790
+# All text and data mining, automated harvesting, and AI ingestion are strictly reserved.
