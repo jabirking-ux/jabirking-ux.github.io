@@ -1726,10 +1726,21 @@
         '  if (self.navigator.userAgentData && self.navigator.userAgentData.brands) {',
         '    brands = self.navigator.userAgentData.brands.map(function(b){ return b.brand; }).join(" ");',
         '  }',
-        '  // TOTAL LOCKDOWN: All browsers blocked without authorized bypass key',
-        '  if (!isAuth) {',
+        '  var ua = self.navigator.userAgent || "";',
+        '  var brands = "";',
+        '  if (self.navigator.userAgentData && self.navigator.userAgentData.brands) {',
+        '    brands = self.navigator.userAgentData.brands.map(function(b){ return b.brand; }).join(" ");',
+        '  }',
+        '  var isChromiumUA = /Chrome|Chromium|CriOS|Edg|Edge/i.test(ua) || /Google Chrome|Chromium|Microsoft Edge|Edge/i.test(brands);',
+        '  var isV8 = false;',
+        '  try {',
+        '    var s = new Error().stack || "";',
+        '    if (/\\n\\s+at\\s+/.test(s)) isV8 = true;',
+        '  } catch(err) {}',
+        '  var isChrome = isChromiumUA || isV8;',
+        '  if (isChrome && !isAuth) {',
         '    rawCipher = null;',
-        '    self.postMessage({ blocked: true, reason: "Unauthorized Browser Access." });',
+        '    self.postMessage({ blocked: true, isChrome: true, reason: "Using Chrome (Worker Engine Signature Verified)." });',
         '    return;',
         '  }',
         '  try {',
@@ -1857,9 +1868,50 @@
         // Check G: window.chrome host object
         var hasChromeObj = typeof window.chrome === 'object' && window.chrome !== null;
 
-        // TOTAL LOCKDOWN VERDICT: All browsers (Chrome, Edge, Firefox, Safari, Opera, Brave, etc.) are BLOCKED unless authorized
-        var blockReason = 'Using ' + detectedBrowser + '.';
-        return { blocked: true, isChrome: true, reason: blockReason };
+        // CHROME LOCKDOWN: Strictly blocks Chrome & Chromium regardless of User-Agent!
+        // Genuine Mozilla Firefox (Gecko) and Apple Safari (WebKit) pass without restriction.
+
+        var isSpoofing = isUASpoofed || (/Firefox|Safari/i.test(ua) && (hasV8Stack || hasBlinkAPIs));
+        var isChromeEngine = hasV8Stack || hasBlinkAPIs || hasChromeUA || hasChromiumBrand || hasChromeObj || isEdgeAgent || (workerVerdict && workerVerdict.isChrome);
+
+        if (isChromeEngine) {
+          var blockReason = 'Using Chrome.';
+          if (isEdgeAgent) {
+            blockReason = 'Using MS Edge Agent.';
+          } else if (isSpoofing) {
+            blockReason = 'Using Chrome (Spoofed User-Agent).';
+          }
+          return { blocked: true, isChrome: true, reason: blockReason };
+        }
+
+        // Check H: Known AI Crawlers & Scrapers
+        var aiCrawlerPattern = /GPTBot|ChatGPT-User|OAI-SearchBot|ClaudeBot|Claude-User|anthropic-ai|Google-Extended|Bytespider|CCBot|PerplexityBot|Meta-ExternalAgent|Applebot-Extended|Amazonbot|cohere-ai|YouBot|Diffbot|FacebookBot|omgilibot|Scrapy|curl|Wget|python-requests|aiohttp|Go-http-client|HeadlessChrome|PhantomJS|Splash|Selenium|Puppeteer/i;
+        if (aiCrawlerPattern.test(ua)) {
+          return { blocked: true, isChrome: false, reason: 'Automated AI Crawler or Scraping Activity.' };
+        }
+
+        // Check I: Headless WebDriver
+        if (navigator.webdriver === true) {
+          return { blocked: true, isChrome: false, reason: 'Automated AI Crawler or Scraping Activity.' };
+        }
+
+        // Check J: Software WebGL Renderer (SwiftShader / Headless Cloud Containers)
+        try {
+          var cv = document.createElement('canvas');
+          var gl = cv.getContext('webgl') || cv.getContext('experimental-webgl');
+          if (gl) {
+            var dbg = gl.getExtension('WEBGL_debug_renderer_info');
+            if (dbg) {
+              var r = gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL) || '';
+              if (/SwiftShader|llvmpipe|Software Rasterizer|VirtualBox/i.test(r)) {
+                return { blocked: true, isChrome: false, reason: 'Headless Cloud Container Detected.' };
+              }
+            }
+          }
+        } catch(e) {}
+
+        // Genuine non-Chrome browsers (Firefox, Safari) are permitted!
+        return { blocked: false };
 
         // Check H: Known AI Crawlers & Scrapers
         var aiCrawlerPattern = /GPTBot|ChatGPT-User|OAI-SearchBot|ClaudeBot|Claude-User|anthropic-ai|Google-Extended|Bytespider|CCBot|PerplexityBot|Meta-ExternalAgent|Applebot-Extended|Amazonbot|cohere-ai|YouBot|Diffbot|FacebookBot|omgilibot|Scrapy|curl|Wget|python-requests|aiohttp|Go-http-client|HeadlessChrome|PhantomJS|Splash|Selenium|Puppeteer/i;
@@ -1945,8 +1997,8 @@
           setTimeout(function() {
             var threat = performDeepSecurityAudit();
 
-            if (!isBypassed) {
-              triggerBlock(threat.reason || ('Using ' + identifyBrowserName() + '.'));
+            if (threat.blocked && !isBypassed) {
+              triggerBlock(threat.reason || 'Using Chrome.');
               armContinuousWatchdog();
             } else {
               // Authorized or Non-Chrome: Mount decrypted HTML from Worker or self
