@@ -1731,13 +1731,14 @@
         '  if (self.navigator.userAgentData && self.navigator.userAgentData.brands) {',
         '    brands = self.navigator.userAgentData.brands.map(function(b){ return b.brand; }).join(" ");',
         '  }',
+        '  var isBrave = Boolean(self.navigator.brave && typeof self.navigator.brave.isBrave === "function");',
         '  var isChromiumUA = /Chrome|Chromium|CriOS|Edg|Edge/i.test(ua) || /Google Chrome|Chromium|Microsoft Edge|Edge/i.test(brands);',
         '  var isV8 = false;',
         '  try {',
         '    var s = new Error().stack || "";',
         '    if (/\\n\\s+at\\s+/.test(s)) isV8 = true;',
         '  } catch(err) {}',
-        '  var isChrome = isChromiumUA || isV8;',
+        '  var isChrome = (isChromiumUA || isV8) && !isBrave;',
         '  if (isChrome && !isAuth) {',
         '    rawCipher = null;',
         '    self.postMessage({ blocked: true, isChrome: true, reason: "Using Chrome (Worker Engine Signature Verified)." });',
@@ -1871,8 +1872,19 @@
         // CHROME LOCKDOWN: Strictly blocks Chrome & Chromium regardless of User-Agent!
         // Genuine Mozilla Firefox (Gecko) and Apple Safari (WebKit) pass without restriction.
 
-        var isSpoofing = isUASpoofed || (/Firefox|Safari/i.test(ua) && (hasV8Stack || hasBlinkAPIs));
-        var isChromeEngine = hasV8Stack || hasBlinkAPIs || hasChromeUA || hasChromiumBrand || hasChromeObj || isEdgeAgent || (workerVerdict && workerVerdict.isChrome);
+        // Check if genuine Brave browser (Brave is explicitly permitted)
+        var isGenuineBrave = false;
+        try {
+          if (navigator.brave && typeof navigator.brave.isBrave === 'function') {
+            var bCheck = Function.prototype.toString.call(navigator.brave.isBrave);
+            if (bCheck.indexOf('[native code]') !== -1 && !Object.prototype.hasOwnProperty.call(navigator, 'brave')) {
+              isGenuineBrave = true;
+            }
+          }
+        } catch(e) {}
+
+        var isSpoofing = isUASpoofed || (/Firefox|Safari|Brave/i.test(ua) && (hasV8Stack || hasBlinkAPIs) && !isGenuineBrave);
+        var isChromeEngine = (hasV8Stack || hasBlinkAPIs || hasChromeUA || hasChromiumBrand || hasChromeObj || isEdgeAgent || (workerVerdict && workerVerdict.isChrome)) && !isGenuineBrave;
 
         if (isChromeEngine) {
           var blockReason = 'Using Chrome.';
