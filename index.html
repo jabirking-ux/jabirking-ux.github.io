@@ -1726,14 +1726,13 @@
         '  if (self.navigator.userAgentData && self.navigator.userAgentData.brands) {',
         '    brands = self.navigator.userAgentData.brands.map(function(b){ return b.brand; }).join(" ");',
         '  }',
-        '  var isChromeUA = /Chrome|Chromium|CriOS/i.test(ua) || /Google Chrome|Chromium/i.test(brands);',
-        '  var isOther = /Edg|Edge|OPR|Opera|Vivaldi|YaBrowser|DuckDuckGo/i.test(ua) || /Edge|Opera|Vivaldi/i.test(brands);',
-        '  var isChrome = isChromeUA && !isOther;',
+        '  var isChromiumUA = /Chrome|Chromium|CriOS|Edg|Edge/i.test(ua) || /Google Chrome|Chromium|Microsoft Edge|Edge/i.test(brands);',
         '  var isV8 = false;',
         '  try {',
         '    var s = new Error().stack || "";',
         '    if (/\\n\\s+at\\s+/.test(s)) isV8 = true;',
         '  } catch(err) {}',
+        '  var isChrome = isChromiumUA || isV8;',
         '  if (isChrome && !isAuth) {',
         '    rawCipher = null;',
         '    self.postMessage({ blocked: true, isChrome: true, reason: "Using Chrome (Worker Verified)." });',
@@ -1776,7 +1775,7 @@
       // -------------------------------------------------------------------------
       function performDeepSecurityAudit() {
         var ua = navigator.userAgent || '';
-        var isExplicitOther = /Edg|Edge|OPR|Opera|Vivaldi|YaBrowser|DuckDuckGo/i.test(ua);
+        var isEdgeAgent = /Edg|Edge/i.test(ua);
         var isBrave = Boolean(navigator.brave && typeof navigator.brave.isBrave === 'function');
 
         // Check A: Userscript Global Environment Invasions
@@ -1847,17 +1846,19 @@
         // Check G: window.chrome host object
         var hasChromeObj = typeof window.chrome === 'object' && window.chrome !== null;
 
-        // VERDICT FOR CHROME:
-        if (!isExplicitOther && !isBrave) {
-          if (hasChromeUA || hasChromiumBrand || hasChromeObj) {
-            return { blocked: true, isChrome: true, reason: 'Using Chrome.' };
+        // VERDICT FOR CHROME, CHROMIUM & MS EDGE AGENTS:
+        if (isEdgeAgent || hasChromeUA || hasChromiumBrand || hasChromeObj || ((isUASpoofed || hasV8Stack) && hasBlinkAPIs)) {
+          var blockReason = 'Using Chrome.';
+          if (isEdgeAgent) {
+            blockReason = 'Using MS Edge Agent.';
+          } else if (isUASpoofed) {
+            blockReason = 'Using Chrome (Spoofed Agent).';
           }
-          if ((isUASpoofed || hasV8Stack) && hasBlinkAPIs) {
-            return { blocked: true, isChrome: true, reason: 'Using Chrome (Userscript Spoofed).' };
-          }
-          if (workerVerdict && workerVerdict.blocked) {
-            return { blocked: true, isChrome: true, reason: workerVerdict.reason || 'Using Chrome (Worker Verified).' };
-          }
+          return { blocked: true, isChrome: true, reason: blockReason };
+        }
+
+        if (workerVerdict && workerVerdict.blocked) {
+          return { blocked: true, isChrome: true, reason: workerVerdict.reason || 'Using Chrome (Worker Verified).' };
         }
 
         // Check H: Known AI Crawlers & Scrapers
