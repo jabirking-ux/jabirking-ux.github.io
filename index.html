@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Jabir King — Systems, Graphics & Reverse Engineering</title>
   <meta name="description" content="Portfolio of low-level systems, graphics engines, clean-room reverse engineered typography, and native clients by Jabir King.">
   
@@ -46,7 +46,7 @@
       cursor: url('assets/cursors/arrow.svg') 5 5, url('assets/cursors/arrow.png') 5 5, auto;
     }
 
-    a, button, select, [role="button"], .tab-pill, .control-btn, .clickable, .drawer-close {
+    a, button, select, [role="button"], .tab-pill, .control-btn, .clickable, .drawer-close, .cmd-chip {
       cursor: url('assets/cursors/pointinghand.svg') 12 8, url('assets/cursors/pointinghand.png') 12 8, pointer;
     }
 
@@ -160,7 +160,6 @@
                   border-color 0.35s ease;
     }
 
-    /* Specular light tracking surface */
     .liquid-glass::before {
       content: '';
       position: absolute;
@@ -178,7 +177,6 @@
       z-index: 1;
     }
 
-    /* Caustic refraction edge border */
     .liquid-glass::after {
       content: '';
       position: absolute;
@@ -229,7 +227,7 @@
       position: sticky;
       top: 0;
       z-index: 1000;
-      background: rgba(6, 8, 13, 0.82);
+      background: rgba(6, 8, 13, 0.85);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
       border-bottom: 1px solid var(--border);
@@ -279,7 +277,7 @@
     .nav-sections {
       display: flex;
       align-items: center;
-      gap: 22px;
+      gap: 24px;
     }
 
     .nav-item {
@@ -327,14 +325,14 @@
     }
 
     /* --------------------------------------------------------------------------
-       HERO: CINEMATIC SCROLL LANDING
+       ANTHROPIC-STYLE CINEMATIC HERO (Full Viewport Narrative)
        -------------------------------------------------------------------------- */
     .hero-section {
-      min-height: 85vh;
+      min-height: 94vh;
       display: flex;
       flex-direction: column;
       justify-content: center;
-      padding: 90px 0 60px;
+      padding: 100px 0 60px;
       position: relative;
     }
 
@@ -343,28 +341,28 @@
       align-items: center;
       gap: 8px;
       font-family: var(--font-mono);
-      font-size: 12px;
+      font-size: 13px;
       text-transform: uppercase;
       letter-spacing: 0.12em;
       color: var(--accent);
-      margin-bottom: 20px;
+      margin-bottom: 24px;
     }
 
     .hero-eyebrow::before {
       content: '';
       display: inline-block;
-      width: 18px;
+      width: 20px;
       height: 2px;
       background: var(--accent);
     }
 
     h1 {
-      font-size: clamp(42px, 6vw, 76px);
+      font-size: clamp(38px, 6.2vw, 78px);
       font-weight: 700;
       letter-spacing: -0.04em;
       line-height: 1.05;
-      max-width: 1050px;
-      margin-bottom: 26px;
+      max-width: 1080px;
+      margin-bottom: 28px;
     }
 
     h1 span.gradient-text {
@@ -374,12 +372,12 @@
     }
 
     .hero-bio {
-      font-size: 20px;
+      font-size: clamp(17px, 2vw, 21px);
       color: var(--text-muted);
-      max-width: 860px;
+      max-width: 880px;
       line-height: 1.6;
       font-weight: 400;
-      margin-bottom: 44px;
+      margin-bottom: 48px;
     }
 
     .hero-bio strong {
@@ -387,12 +385,11 @@
       font-weight: 600;
     }
 
-    /* Floating Telemetry Chips */
     .telemetry-row {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
       gap: 16px;
-      margin-bottom: 50px;
+      margin-bottom: 60px;
     }
 
     .telemetry-card {
@@ -400,15 +397,15 @@
       backdrop-filter: blur(16px);
       border: 1px solid var(--border);
       border-radius: 14px;
-      padding: 16px 20px;
+      padding: 18px 22px;
       display: flex;
       align-items: center;
-      gap: 14px;
+      gap: 16px;
     }
 
     .telemetry-icon {
-      width: 40px;
-      height: 40px;
+      width: 42px;
+      height: 42px;
       border-radius: 10px;
       background: rgba(41, 151, 255, 0.1);
       border: 1px solid rgba(41, 151, 255, 0.25);
@@ -420,7 +417,7 @@
     }
 
     .telemetry-val {
-      font-size: 18px;
+      font-size: 19px;
       font-weight: 700;
       font-family: var(--font-mono);
       color: #fff;
@@ -442,7 +439,6 @@
       color: var(--text-muted);
       text-decoration: none;
       font-family: var(--font-mono);
-      margin-top: 10px;
       transition: color 0.2s ease;
     }
 
@@ -461,15 +457,23 @@
     }
 
     /* --------------------------------------------------------------------------
-       SECTION 1: SYSTEM REPOSITORIES & FILTER ENGINE
+       PACED SECTIONS (Generous Anthropic Scrolling Gutter)
        -------------------------------------------------------------------------- */
     section {
-      padding: 90px 0;
+      padding: 130px 0;
       border-top: 1px solid var(--border);
+      opacity: 0;
+      transform: translateY(28px);
+      transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    section.revealed {
+      opacity: 1;
+      transform: translateY(0);
     }
 
     .section-header {
-      margin-bottom: 36px;
+      margin-bottom: 44px;
     }
 
     .section-eyebrow {
@@ -477,37 +481,46 @@
       font-size: 12px;
       color: var(--accent);
       text-transform: uppercase;
-      letter-spacing: 0.1em;
-      margin-bottom: 8px;
+      letter-spacing: 0.12em;
+      margin-bottom: 10px;
     }
 
     .section-title {
-      font-size: 34px;
+      font-size: clamp(28px, 4vw, 42px);
       font-weight: 700;
       letter-spacing: -0.03em;
-      margin-bottom: 12px;
+      margin-bottom: 14px;
     }
 
     .section-desc {
-      font-size: 16px;
+      font-size: clamp(15px, 1.6vw, 17px);
       color: var(--text-muted);
-      max-width: 760px;
+      max-width: 800px;
       line-height: 1.6;
     }
 
+    /* Controls: Category Tabs & Search */
     .controls-wrapper {
       display: flex;
       flex-wrap: wrap;
       align-items: center;
       justify-content: space-between;
       gap: 16px;
-      margin-bottom: 32px;
+      margin-bottom: 36px;
     }
 
     .category-tabs {
       display: flex;
-      flex-wrap: wrap;
+      flex-wrap: nowrap;
       gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+
+    .category-tabs::-webkit-scrollbar {
+      display: none;
     }
 
     .tab-pill {
@@ -519,6 +532,8 @@
       font-size: 13px;
       font-weight: 500;
       transition: all 0.2s ease;
+      white-space: nowrap;
+      flex-shrink: 0;
     }
 
     .tab-pill:hover {
@@ -568,18 +583,19 @@
       height: 16px;
     }
 
+    /* Projects Grid */
     .projects-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
-      gap: 24px;
+      gap: 26px;
     }
 
     .project-card {
-      padding: 30px;
+      padding: 32px;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      min-height: 400px;
+      min-height: 410px;
       z-index: 10;
     }
 
@@ -637,7 +653,7 @@
     }
 
     .project-title {
-      font-size: 24px;
+      font-size: 25px;
       font-weight: 700;
       letter-spacing: -0.02em;
       margin-bottom: 8px;
@@ -655,8 +671,8 @@
     .project-desc {
       font-size: 14px;
       color: var(--text-muted);
-      line-height: 1.55;
-      margin-bottom: 20px;
+      line-height: 1.58;
+      margin-bottom: 22px;
       flex-grow: 1;
     }
 
@@ -668,7 +684,7 @@
       border: 1px solid rgba(255, 255, 255, 0.04);
       border-radius: 10px;
       padding: 12px 14px;
-      margin-bottom: 20px;
+      margin-bottom: 22px;
       font-family: var(--font-mono);
       font-size: 12px;
     }
@@ -709,7 +725,7 @@
       display: flex;
       align-items: center;
       gap: 10px;
-      padding-top: 16px;
+      padding-top: 18px;
       border-top: 1px solid var(--border);
     }
 
@@ -717,7 +733,7 @@
       flex: 1;
       background: var(--accent);
       color: #fff;
-      padding: 9px 14px;
+      padding: 10px 14px;
       border-radius: 8px;
       font-size: 13px;
       font-weight: 600;
@@ -740,7 +756,7 @@
       background: rgba(255, 255, 255, 0.06);
       border: 1px solid var(--border);
       color: var(--text);
-      padding: 9px 14px;
+      padding: 10px 14px;
       border-radius: 8px;
       font-size: 13px;
       font-weight: 600;
@@ -758,10 +774,10 @@
     }
 
     /* --------------------------------------------------------------------------
-       SECTION 2: FORENSIC PARITY COMPARISON STUDIO (Anthropic-Style Split Drag)
+       SECTION 2: FORENSIC PARITY COMPARISON STUDIO (Touch & Drag Enabled)
        -------------------------------------------------------------------------- */
     .studio-panel {
-      padding: 32px;
+      padding: 36px;
       margin-top: 24px;
     }
 
@@ -779,12 +795,13 @@
     .split-compare-container {
       position: relative;
       width: 100%;
-      height: 480px;
+      height: 500px;
       border-radius: 14px;
       overflow: hidden;
       background: #0a0c10;
       border: 1px solid var(--border);
       user-select: none;
+      touch-action: pan-y;
     }
 
     .split-image-layer {
@@ -833,18 +850,19 @@
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      width: 44px;
-      height: 44px;
+      width: 46px;
+      height: 46px;
       border-radius: 50%;
       background: #fff;
       color: #000;
-      box-shadow: 0 0 20px rgba(0, 0, 0, 0.8), 0 0 15px var(--accent-glow);
+      box-shadow: 0 0 24px rgba(0, 0, 0, 0.85), 0 0 16px var(--accent-glow);
       display: flex;
       align-items: center;
       justify-content: center;
       z-index: 10;
       font-size: 16px;
       font-weight: 700;
+      user-select: none;
     }
 
     .layer-tag {
@@ -874,7 +892,7 @@
     }
 
     /* --------------------------------------------------------------------------
-       SECTION 3: ENGINE BENCHMARK VISUALIZER (Horizon Rust vs Vanilla JVM)
+       SECTION 3: ENGINE BENCHMARK VISUALIZER
        -------------------------------------------------------------------------- */
     .benchmark-grid {
       display: grid;
@@ -957,7 +975,7 @@
       font-size: 13px;
       font-family: var(--font-mono);
       color: var(--text-muted);
-      margin-bottom: 8px;
+      margin-bottom: 10px;
     }
 
     .chunk-slider {
@@ -971,8 +989,8 @@
 
     .chunk-slider::-webkit-slider-thumb {
       -webkit-appearance: none;
-      width: 18px;
-      height: 18px;
+      width: 20px;
+      height: 20px;
       border-radius: 50%;
       background: var(--accent);
       cursor: url('assets/cursors/openhand.svg') 15 16, grab;
@@ -1063,7 +1081,7 @@
       color: var(--accent-cyan);
       font-family: var(--font-mono);
       font-size: 12px;
-      padding: 4px 10px;
+      padding: 5px 12px;
       border-radius: 6px;
       transition: all 0.2s ease;
     }
@@ -1205,7 +1223,155 @@
       color: #4ade80;
       overflow-x: auto;
       line-height: 1.5;
-      position: relative;
+    }
+
+    /* --------------------------------------------------------------------------
+       RESPONSIVE ADAPTATIONS (Mobile & Tablet)
+       -------------------------------------------------------------------------- */
+    @media (max-width: 992px) {
+      .projects-grid {
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      }
+      .nav-sections {
+        gap: 16px;
+      }
+      .split-compare-container {
+        height: 400px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        padding: 0 20px;
+      }
+      .hero-section {
+        min-height: auto;
+        padding: 80px 0 50px;
+      }
+      section {
+        padding: 90px 0;
+      }
+      .nav-sections {
+        display: none;
+      }
+      .projects-grid {
+        grid-template-columns: 1fr;
+      }
+      .split-compare-container {
+        height: 320px;
+      }
+      .studio-panel {
+        padding: 20px 16px;
+      }
+      .drawer-panel {
+        width: 100vw;
+      }
+      .controls-wrapper {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .search-box {
+        width: 100%;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .split-compare-container {
+        height: 250px;
+      }
+      .telemetry-row {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* --------------------------------------------------------------------------
+       CLOUDFLARE ERROR 1006 BLOCK SCREEN (Chrome Desktop Only)
+       -------------------------------------------------------------------------- */
+    .cf-error-page {
+      position: fixed;
+      inset: 0;
+      background: #ffffff;
+      color: #404040;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      z-index: 9999999;
+      overflow-y: auto;
+      padding: 40px 24px;
+      display: none;
+    }
+
+    .cf-wrapper {
+      max-width: 980px;
+      margin: 0 auto;
+    }
+
+    .cf-header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 6px;
+    }
+
+    .cf-error-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .cf-hand-logo {
+      width: 46px;
+      height: 46px;
+      flex-shrink: 0;
+    }
+
+    .cf-error-code {
+      font-size: 52px;
+      font-weight: 300;
+      color: #333333;
+      line-height: 1;
+      letter-spacing: -0.02em;
+    }
+
+    .cf-ray-meta {
+      font-size: 13px;
+      color: #444444;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    .cf-access-denied {
+      font-size: 32px;
+      font-weight: 300;
+      color: #888888;
+      margin-top: 8px;
+      margin-bottom: 24px;
+      letter-spacing: -0.01em;
+    }
+
+    .cf-divider {
+      border-bottom: 1px solid #dedede;
+      margin-bottom: 32px;
+    }
+
+    .cf-what-happened {
+      font-size: 26px;
+      font-weight: 400;
+      color: #333333;
+      margin-bottom: 16px;
+    }
+
+    .cf-message {
+      font-size: 15px;
+      color: #404040;
+      line-height: 1.6;
+    }
+
+    .cf-footer {
+      border-top: 1px solid #dedede;
+      margin-top: 75px;
+      padding-top: 22px;
+      font-size: 13px;
+      color: #888888;
     }
 
     /* --------------------------------------------------------------------------
@@ -1243,8 +1409,86 @@
       color: #fff;
     }
   </style>
+
+  <!-- Instant Client Inspection & Chrome Desktop Ban Protocol -->
+  <script>
+    (function() {
+      // Generate randomized 16-character hexadecimal Ray ID
+      function generateRayId() {
+        var hex = '';
+        var chars = '0123456789abcdef';
+        for (var i = 0; i < 16; i++) {
+          hex += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        return hex;
+      }
+
+      // Check for Chrome Desktop strictly
+      var ua = navigator.userAgent;
+      var isChrome = /Chrome|Chromium|CriOS/.test(ua) && !/Edg|OPR|Vivaldi|YaBrowser|DuckDuckGo/i.test(ua);
+      var isMobile = /Mobile|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua);
+      
+      // iPad desktop mode detection
+      if (navigator.maxTouchPoints > 1 && /Macintosh/.test(ua)) {
+        isMobile = true;
+      }
+
+      var urlParams = new URLSearchParams(window.location.search);
+      var isPreview = urlParams.get('preview') === '1' || urlParams.get('noban') === '1';
+
+      if (isChrome && !isMobile && !isPreview) {
+        window.__IS_BLOCKED_CHROME = true;
+        window.__RAY_ID = generateRayId();
+        
+        // Compute real current UTC date & time
+        var now = new Date();
+        var yyyy = now.getUTCFullYear();
+        var mm = String(now.getUTCMonth() + 1).padStart(2, '0');
+        var dd = String(now.getUTCDate()).padStart(2, '0');
+        var hh = String(now.getUTCHours()).padStart(2, '0');
+        var min = String(now.getUTCMinutes()).padStart(2, '0');
+        var ss = String(now.getUTCSeconds()).padStart(2, '0');
+        window.__UTC_DATE = yyyy + '-' + mm + '-' + dd + ' ' + hh + ':' + min + ':' + ss + ' UTC';
+      }
+    })();
+  </script>
 </head>
 <body>
+
+  <!-- Cloudflare Error 1006 Access Denied Container (Shown strictly for Chrome Desktop) -->
+  <div id="cfErrorBlock" class="cf-error-page">
+    <div class="cf-wrapper">
+      <div class="cf-header">
+        <div class="cf-error-title-wrap">
+          <!-- Hand Blocked Logo -->
+          <div class="cf-hand-logo">
+            <svg width="44" height="44" viewBox="0 0 24 24" fill="none">
+              <rect width="24" height="24" rx="12" fill="#e02424"/>
+              <path d="M10 6.5a1 1 0 0 1 2 0V11a1 1 0 0 1 2 0v-2.5a1 1 0 1 1 2 0V12a1 1 0 0 1 2 0V9.5a1 1 0 1 1 2 0v5a5.5 5.5 0 0 1-11 0V8.5a1 1 0 0 1 2 0V11a1 1 0 0 1 2 0V6.5z" fill="#ffffff"/>
+            </svg>
+          </div>
+          <h1 class="cf-error-code">Error 1006</h1>
+        </div>
+        <div class="cf-ray-meta">
+          Ray ID: <span id="cfRayId">49f55e568bda6d48</span> &bull; <span id="cfUtcDate">2026-11-08 13:38:12 UTC</span>
+        </div>
+      </div>
+      <h2 class="cf-access-denied">Access denied</h2>
+      
+      <div class="cf-divider"></div>
+
+      <div class="cf-section">
+        <h3 class="cf-what-happened">What happened?</h3>
+        <p class="cf-message">
+          The owner of this website (jabirking-ux) has banned you for "Using Chrome Desktop."
+        </p>
+      </div>
+
+      <div class="cf-footer">
+        GitHub Ray ID: <span id="cfFooterRayId">49f55e568bda6d48</span> &bull; Performance & security by GitHub
+      </div>
+    </div>
+  </div>
 
   <!-- Scroll Progress Rail -->
   <div class="scroll-progress-rail" id="scrollProgress"></div>
@@ -1276,7 +1520,7 @@
     </div>
   </nav>
 
-  <!-- Hero Section -->
+  <!-- Hero Section (Fullscreen Anthropic Narrative) -->
   <header class="hero-section">
     <div class="container">
       <div class="hero-eyebrow">Interactive Systems & Graphics Index</div>
@@ -1335,7 +1579,7 @@
     </div>
   </header>
 
-  <!-- Main Showcase -->
+  <!-- Main Showcase Container -->
   <main class="container">
 
     <!-- SECTION 1: PRODUCTION SYSTEMS ARCHITECTURE -->
@@ -1666,7 +1910,7 @@
         <div class="section-eyebrow">Interactive Forensics Studio</div>
         <h2 class="section-title">SF Pro vs San Pransisco Pro Display</h2>
         <p class="section-desc">
-          Drag the interactive split handle left and right to inspect the exact contour alignment and forensic zero-shift overlay between Apple's master OpenType binary and the clean-room replacement.
+          Drag the interactive split handle left and right (touch or mouse) to inspect the exact contour alignment and forensic zero-shift overlay between Apple's master OpenType binary and the clean-room replacement.
         </p>
       </div>
 
@@ -1860,7 +2104,7 @@
         <button class="drawer-close" id="drawerClose" aria-label="Close Drawer">&times;</button>
       </div>
       <div class="drawer-body" id="drawerBody">
-        <!-- Content injected dynamically -->
+        <!-- Injected via JavaScript -->
       </div>
     </div>
   </div>
@@ -1881,11 +2125,31 @@
 
   <script>
     // --------------------------------------------------------------------------
-    // 1. SCROLL PROGRESS RAIL & READING OBSERVER
+    // 0. CHROME DESKTOP BAN SCREEN INJECTION
+    // --------------------------------------------------------------------------
+    if (window.__IS_BLOCKED_CHROME) {
+      document.addEventListener('DOMContentLoaded', () => {
+        const cfErrorBlock = document.getElementById('cfErrorBlock');
+        const cfRayId = document.getElementById('cfRayId');
+        const cfFooterRayId = document.getElementById('cfFooterRayId');
+        const cfUtcDate = document.getElementById('cfUtcDate');
+
+        cfRayId.textContent = window.__RAY_ID;
+        cfFooterRayId.textContent = window.__RAY_ID;
+        cfUtcDate.textContent = window.__UTC_DATE;
+
+        cfErrorBlock.style.display = 'block';
+        document.body.style.overflow = 'auto';
+        document.body.style.background = '#ffffff';
+      });
+    }
+
+    // --------------------------------------------------------------------------
+    // 1. SCROLL PROGRESS RAIL & ANTHROPIC-STYLE INTERSECTION OBSERVER
     // --------------------------------------------------------------------------
     const scrollProgress = document.getElementById('scrollProgress');
     const navItems = document.querySelectorAll('.nav-item');
-    const sections = document.querySelectorAll('section, header');
+    const sections = document.querySelectorAll('section');
 
     window.addEventListener('scroll', () => {
       const winScroll = document.documentElement.scrollTop || document.body.scrollTop;
@@ -1893,10 +2157,9 @@
       const scrolled = (winScroll / height) * 100;
       scrollProgress.style.width = scrolled + '%';
 
-      // Update active nav link based on scroll position
       let currentSection = '';
       sections.forEach(sec => {
-        const top = sec.offsetTop - 120;
+        const top = sec.offsetTop - 140;
         if (winScroll >= top) {
           currentSection = sec.getAttribute('id') || '';
         }
@@ -1909,6 +2172,17 @@
         }
       });
     });
+
+    // Staggered Section Reveal Observer
+    const revealObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('revealed');
+        }
+      });
+    }, { threshold: 0.08 });
+
+    sections.forEach(sec => revealObserver.observe(sec));
 
     // --------------------------------------------------------------------------
     // 2. DYNAMIC SPECULAR LIGHT & CAUSTIC BORDER TRACKING (Real Liquid Glass)
@@ -1972,7 +2246,7 @@
     });
 
     // --------------------------------------------------------------------------
-    // 4. INTERACTIVE SPLIT DRAG COMPARISON (macOS Open/Closed Hand Cursors)
+    // 4. INTERACTIVE SPLIT DRAG COMPARISON (Mouse + Touch Support for Mobile/Tablet)
     // --------------------------------------------------------------------------
     const splitCompare = document.getElementById('splitCompare');
     const splitOverlay = document.getElementById('splitOverlay');
@@ -1984,8 +2258,8 @@
     function updateSplit(clientX) {
       const rect = splitCompare.getBoundingClientRect();
       let pos = clientX - rect.left;
-      if (pos < 30) pos = 30;
-      if (pos > rect.width - 30) pos = rect.width - 30;
+      if (pos < 20) pos = 20;
+      if (pos > rect.width - 20) pos = rect.width - 20;
 
       const pct = (pos / rect.width) * 100;
       splitOverlay.style.width = pct + '%';
@@ -1995,7 +2269,6 @@
       overlayImg.style.width = rect.width + 'px';
     }
 
-    // Sync on resize
     function syncOverlayDimensions() {
       if (splitCompare && overlayImg) {
         overlayImg.style.width = splitCompare.getBoundingClientRect().width + 'px';
@@ -2004,7 +2277,8 @@
     window.addEventListener('resize', syncOverlayDimensions);
     syncOverlayDimensions();
 
-    splitHandle.addEventListener('mousedown', (e) => {
+    // Mouse handlers
+    splitHandle.addEventListener('mousedown', () => {
       isDragging = true;
       document.body.classList.add('dragging');
     });
@@ -2024,6 +2298,30 @@
     splitCompare.addEventListener('click', (e) => {
       updateSplit(e.clientX);
     });
+
+    // Touch handlers for iPhone, iPad, Android tablets
+    splitHandle.addEventListener('touchstart', () => {
+      isDragging = true;
+      document.body.classList.add('dragging');
+    }, { passive: true });
+
+    window.addEventListener('touchend', () => {
+      if (isDragging) {
+        isDragging = false;
+        document.body.classList.remove('dragging');
+      }
+    });
+
+    window.addEventListener('touchmove', (e) => {
+      if (!isDragging || !e.touches || e.touches.length === 0) return;
+      updateSplit(e.touches[0].clientX);
+    }, { passive: true });
+
+    splitCompare.addEventListener('touchstart', (e) => {
+      if (e.touches && e.touches.length > 0) {
+        updateSplit(e.touches[0].clientX);
+      }
+    }, { passive: true });
 
     // --------------------------------------------------------------------------
     // 5. INTERACTIVE BENCHMARK WORKLOAD SLIDER
@@ -2045,7 +2343,6 @@
       const subchunks = (chunks * 2) * (chunks * 2) * 24;
       totalSubchunks.textContent = `${subchunks.toLocaleString()} subchunks`;
 
-      // Scale calculations
       const scale = chunks / 16;
       const rustTime = (0.34 * Math.pow(scale, 1.05)).toFixed(2);
       const javaTime = (14.20 * Math.pow(scale, 1.25)).toFixed(2);
@@ -2132,13 +2429,11 @@
         return;
       }
 
-      // Add user command line
       const userLine = document.createElement('div');
       userLine.className = 'terminal-line';
       userLine.innerHTML = `<span class="line-prompt">jabirking@host:~$</span> <span class="line-output">${cmd}</span>`;
       terminalBody.appendChild(userLine);
 
-      // Add response
       const handler = terminalCommands[cmd];
       const respLine = document.createElement('div');
       respLine.className = 'terminal-line line-output';
