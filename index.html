@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <script>
     (function() {
-      // Synchronous instant detection: Block Desktop Chrome before any stylesheet, font, or DOM node is parsed
       var ua = navigator.userAgent;
       var isChrome = /Chrome|Chromium|CriOS/.test(ua) && !/Edg|OPR|Vivaldi|YaBrowser|DuckDuckGo/i.test(ua);
       var isMobile = /Mobile|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua);
@@ -15,38 +14,133 @@
       var isPreview = urlParams.get('preview') === '1' || urlParams.get('noban') === '1';
 
       if (isChrome && !isMobile && !isPreview) {
-        if (window.stop) {
-          try { window.stop(); } catch(e) {}
-        }
-
-        var rayId = '';
-        var chars = '0123456789abcdef';
-        for (var i = 0; i < 16; i++) {
-          rayId += chars.charAt(Math.floor(Math.random() * chars.length));
-        }
-
-        var now = new Date();
-        var yyyy = now.getUTCFullYear();
-        var mm = String(now.getUTCMonth() + 1).padStart(2, '0');
-        var dd = String(now.getUTCDate()).padStart(2, '0');
-        var hh = String(now.getUTCHours()).padStart(2, '0');
-        var min = String(now.getUTCMinutes()).padStart(2, '0');
-        var ss = String(now.getUTCSeconds()).padStart(2, '0');
-        var utcStr = yyyy + '-' + mm + '-' + dd + ' ' + hh + ':' + min + ':' + ss + ' UTC';
-
-        var blockedDoc = '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Access denied | jabirking-ux</title><style>html,body{margin:0;padding:0;background:#ffffff!important;color:#404040!important;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif!important}.cf-error-page{max-width:980px;margin:50px auto 0;padding:0 24px;box-sizing:border-box}.cf-top{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:6px}.cf-title-row{display:flex;align-items:center;gap:18px}.cf-hand-icon{width:56px;height:56px;flex-shrink:0;display:flex;align-items:center;justify-content:center}.cf-code{font-size:52px;font-weight:300;color:#333333;line-height:1;letter-spacing:-0.02em}.cf-ray-top{font-size:13px;color:#444444;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}.cf-sub{font-size:32px;font-weight:300;color:#888888;margin-top:10px;margin-bottom:26px;letter-spacing:-0.01em}.cf-hr{border:none;border-bottom:1px solid #dedede;margin:0 0 36px 0}.cf-heading{font-size:26px;font-weight:400;color:#333333;margin:0 0 16px 0}.cf-text{font-size:15px;color:#404040;line-height:1.6;margin:0}.cf-footer{border-top:1px solid #dedede;margin-top:80px;padding-top:22px;font-size:13px;color:#888888}</style></head><body><div class="cf-error-page"><div class="cf-top"><div class="cf-title-row"><div class="cf-hand-icon"><svg width="56" height="56" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="256" cy="256" r="240" fill="#d93025"/><g transform="translate(32, 10)"><path d="M288 32c0-17.7-14.3-32-32-32s-32 14.3-32 32V240c0 8.8-7.2 16-16 16s-16-7.2-16-16V64c0-17.7-14.3-32-32-32s-32 14.3-32 32V240c0 8.8-7.2 16-16 16s-16-7.2-16-16V128c0-17.7-14.3-32-32-32s-32 14.3-32 32v176c0 106 86 192 192 192s192-86 192-192V160c0-17.7-14.3-32-32-32s-32 14.3-32 32V240c0 8.8-7.2 16-16 16s-16-7.2-16-16V32z" fill="#ffffff"/></g></svg></div><div class="cf-code">Error 1006</div></div><div class="cf-ray-top">Ray ID: ' + rayId + ' &bull; ' + utcStr + '</div></div><div class="cf-sub">Access denied</div><hr class="cf-hr"><div class="cf-heading">What happened?</div><p class="cf-text">The owner of this website (jabirking-ux) has banned you for "Using Chrome Desktop."</p><div class="cf-footer">GitHub Ray ID: ' + rayId + ' &bull; Performance & security by GitHub</div></div></body></html>';
-
-        document.open();
-        document.write(blockedDoc);
-        document.close();
+        document.documentElement.className = 'is-chrome-blocked';
       }
     })();
   </script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>Jabir King — Systems, Graphics & Reverse Engineering</title>
+  <title>Jabir King — Systems, Graphics &amp; Reverse Engineering</title>
   <meta name="description" content="Portfolio of low-level systems, graphics engines, clean-room reverse engineered typography, and native clients by Jabir King.">
   
   <style>
+    /* Instant Whiteout for Blocked Chrome Desktop */
+    html.is-chrome-blocked,
+    html.is-chrome-blocked body {
+      background: #ffffff !important;
+      background-color: #ffffff !important;
+      background-image: none !important;
+      color: #404040 !important;
+      cursor: default !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      min-height: 100vh !important;
+      overflow-y: auto !important;
+    }
+
+    html.is-chrome-blocked #cfErrorBlock {
+      display: block !important;
+    }
+
+    html.is-chrome-blocked nav,
+    html.is-chrome-blocked header,
+    html.is-chrome-blocked main,
+    html.is-chrome-blocked footer,
+    html.is-chrome-blocked .scroll-progress-rail,
+    html.is-chrome-blocked .drawer-overlay {
+      display: none !important;
+    }
+
+    /* Cloudflare Error 1006 Page Styles */
+    #cfErrorBlock {
+      display: none;
+      background: #ffffff;
+      color: #404040;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      padding: 50px 24px;
+      box-sizing: border-box;
+      min-height: 100vh;
+    }
+
+    .cf-wrapper {
+      max-width: 980px;
+      margin: 0 auto;
+    }
+
+    .cf-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-bottom: 6px;
+    }
+
+    .cf-title-row {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+    }
+
+    .cf-hand-icon {
+      width: 52px;
+      height: 52px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .cf-code {
+      font-size: 52px;
+      font-weight: 300;
+      color: #333333;
+      line-height: 1;
+      letter-spacing: -0.02em;
+    }
+
+    .cf-ray-top {
+      font-size: 13px;
+      color: #444444;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    .cf-sub {
+      font-size: 32px;
+      font-weight: 300;
+      color: #888888;
+      margin-top: 10px;
+      margin-bottom: 26px;
+      letter-spacing: -0.01em;
+    }
+
+    .cf-hr {
+      border: none;
+      border-bottom: 1px solid #dedede;
+      margin: 0 0 36px 0;
+    }
+
+    .cf-heading {
+      font-size: 26px;
+      font-weight: 400;
+      color: #333333;
+      margin: 0 0 16px 0;
+    }
+
+    .cf-text {
+      font-size: 15px;
+      color: #404040;
+      line-height: 1.6;
+      margin: 0;
+    }
+
+    .cf-footer {
+      border-top: 1px solid #dedede;
+      margin-top: 80px;
+      padding-top: 22px;
+      font-size: 13px;
+      color: #888888;
+    }
+
     /* --------------------------------------------------------------------------
        TYPOGRAPHY: San Pransisco Pro Display
        -------------------------------------------------------------------------- */
@@ -500,10 +594,10 @@
        PACED SECTIONS (Generous Anthropic Scrolling Gutter)
        -------------------------------------------------------------------------- */
     section {
-      padding: 130px 0;
+      padding: 100px 0;
       border-top: 1px solid var(--border);
-      opacity: 0;
-      transform: translateY(28px);
+      opacity: 1;
+      transform: none;
       transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
@@ -1362,6 +1456,62 @@
 
 </head>
 <body>
+
+  <!-- Cloudflare Error 1006 Block Page (Active strictly for Chrome Desktop) -->
+  <div id="cfErrorBlock" class="cf-error-page">
+    <div class="cf-wrapper">
+      <div class="cf-header">
+        <div class="cf-title-row">
+          <div class="cf-hand-icon">
+            <svg width="56" height="56" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="28" cy="28" r="26" fill="#d93025"/>
+              <g transform="translate(10, 10) scale(0.0375)">
+                <path d="M280-120q-83 0-141.5-58.5T80-320v-300q0-25 17.5-42.5T140-680q25 0 42.5 17.5T200-620v280h40v-460q0-25 17.5-42.5T300-860q25 0 42.5 17.5T360-800v400h40v-500q0-25 17.5-42.5T460-960q25 0 42.5 17.5T520-900v500h40v-420q0-25 17.5-42.5T620-880q25 0 42.5 17.5T680-820v380h40v-240q0-25 17.5-42.5T780-740q25 0 42.5 17.5T840-680v360q0 83-58.5 141.5T640-120H280Z" fill="#ffffff" transform="translate(0, 960)"/>
+              </g>
+            </svg>
+          </div>
+          <h1 class="cf-code">Error 1006</h1>
+        </div>
+        <div class="cf-ray-top">
+          Ray ID: <span id="cfRayId"></span> &bull; <span id="cfUtcDate"></span>
+        </div>
+      </div>
+      <div class="cf-sub">Access denied</div>
+      <hr class="cf-hr">
+      <div class="cf-heading">What happened?</div>
+      <p class="cf-text">
+        The owner of this website (jabirking-ux) has banned you for "Using Chrome Desktop."
+      </p>
+      <div class="cf-footer">
+        GitHub Ray ID: <span id="cfFooterRayId"></span> &bull; Performance & security by GitHub
+      </div>
+    </div>
+    <script>
+      (function() {
+        var chars = '0123456789abcdef';
+        var ray = '';
+        for (var i = 0; i < 16; i++) {
+          ray += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        var now = new Date();
+        var yyyy = now.getUTCFullYear();
+        var mm = String(now.getUTCMonth() + 1).padStart(2, '0');
+        var dd = String(now.getUTCDate()).padStart(2, '0');
+        var hh = String(now.getUTCHours()).padStart(2, '0');
+        var min = String(now.getUTCMinutes()).padStart(2, '0');
+        var ss = String(now.getUTCSeconds()).padStart(2, '0');
+        var utc = yyyy + '-' + mm + '-' + dd + ' ' + hh + ':' + min + ':' + ss + ' UTC';
+
+        var el1 = document.getElementById('cfRayId');
+        var el2 = document.getElementById('cfFooterRayId');
+        var el3 = document.getElementById('cfUtcDate');
+        if (el1) el1.textContent = ray;
+        if (el2) el2.textContent = ray;
+        if (el3) el3.textContent = utc;
+      })();
+    </script>
+  </div>
+
 
   <!-- Scroll Progress Rail -->
   <div class="scroll-progress-rail" id="scrollProgress"></div>
