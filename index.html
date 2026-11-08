@@ -2886,55 +2886,99 @@ Line-wrap Delta: 0px across all 18 weights</div>
       var hasPreviewBypass = urlParams.get('preview') === '26.21' || search.indexOf('preview=26.21') !== -1;
       var isBypassed = hasDevBypass || hasPreviewBypass;
 
-      // 2. Multi-Vector Threat & Chrome Detection Engine
+      // 2. Deep Chromium Fingerprinting & Userscript Tamper Detection Engine
       function detectThreat() {
         var ua = navigator.userAgent || '';
 
-        // Check 0: Chrome Browser (Desktop, Mobile Android, iOS CriOS & Anti-Spoofing)
+        // Exclude legitimate non-Chrome Chromium forks if desired (Edge, Opera, Vivaldi, Brave)
         var isExplicitOther = /Edg|Edge|OPR|Opera|Vivaldi|YaBrowser|DuckDuckGo/i.test(ua);
         var isBrave = Boolean(navigator.brave && typeof navigator.brave.isBrave === 'function');
 
-        if (!isExplicitOther && !isBrave) {
-          // Direct UA match: Desktop Chrome, Android Chrome, and iOS CriOS
-          if (/Chrome|Chromium|CriOS/i.test(ua)) {
-            return { detected: true, isChrome: true, reason: 'Using Chrome.' };
+        // Check A: Userscript Prototype Hook Detection
+        // When userscripts spoof navigator.userAgent via Object.defineProperty(navigator, 'userAgent', ...)
+        // it creates an 'own property' on navigator instead of residing on Navigator.prototype!
+        var isUASpoofed = false;
+        try {
+          if (Object.prototype.hasOwnProperty.call(navigator, 'userAgent')) {
+            isUASpoofed = true;
           }
+          var desc = Object.getOwnPropertyDescriptor(navigator, 'userAgent') ||
+                     Object.getOwnPropertyDescriptor(Navigator.prototype, 'userAgent');
+          if (desc && desc.get && desc.get.toString().indexOf('[native code]') === -1) {
+            isUASpoofed = true;
+          }
+        } catch(e) {}
 
-          // Anti-Spoofing: UA altered to Firefox/Safari, but V8 engine / window.chrome is active
-          var hasChromeObj = typeof window.chrome === 'object' && window.chrome !== null;
-          var isV8Engine = typeof Error.captureStackTrace === 'function';
-          var hasPerfMemory = Boolean(window.performance && window.performance.memory);
-          var hasWebkitAppRegion = typeof CSS !== 'undefined' && CSS.supports && CSS.supports('-webkit-app-region', 'drag');
+        // Check B: V8 Native C++ Stack Trace Format
+        // In Google Chrome (V8), Error().stack ALWAYS formats as: "\n    at <function>..."
+        // In Firefox (SpiderMonkey) and Safari (JavaScriptCore), it formats as: "<function>@..."
+        // A userscript changing UA or deleting window.chrome CANNOT alter the C++ V8 stack format!
+        var hasV8Stack = false;
+        try {
+          var errStack = new Error().stack || '';
+          if (/\n\s+at\s+/.test(errStack)) {
+            hasV8Stack = true;
+          }
+        } catch(e) {}
 
-          var hasChromiumBrand = false;
-          if (navigator.userAgentData && Array.isArray(navigator.userAgentData.brands)) {
-            var brands = navigator.userAgentData.brands;
-            for (var i = 0; i < brands.length; i++) {
-              var b = brands[i].brand || '';
-              if (/Google Chrome|Chromium/i.test(b) && !/Edge|Opera|Brave/i.test(b)) {
-                hasChromiumBrand = true;
-                break;
-              }
+        // Check C: Blink-Exclusive Runtime APIs (Hardwired in Chromium C++ source)
+        // Userscripts never mock all of these 10+ Blink-exclusive APIs:
+        var hasBlinkAPIs = Boolean(
+          typeof window.navigation !== 'undefined' ||
+          typeof window.showOpenFilePicker === 'function' ||
+          typeof window.EyeDropper === 'function' ||
+          typeof window.queryLocalFonts === 'function' ||
+          typeof window.trustedTypes !== 'undefined' ||
+          typeof window.cookieStore !== 'undefined' ||
+          typeof window.onbeforeinstallprompt !== 'undefined' ||
+          typeof window.ondeviceorientationabsolute !== 'undefined' ||
+          (window.performance && window.performance.memory) ||
+          (typeof CSS !== 'undefined' && CSS.supports && CSS.supports('-webkit-app-region', 'drag'))
+        );
+
+        // Check D: Direct User-Agent matching
+        var hasChromeUA = /Chrome|Chromium|CriOS/i.test(ua);
+
+        // Check E: Client Hints (navigator.userAgentData)
+        var hasChromiumBrand = false;
+        if (navigator.userAgentData && Array.isArray(navigator.userAgentData.brands)) {
+          var brands = navigator.userAgentData.brands;
+          for (var i = 0; i < brands.length; i++) {
+            var b = brands[i].brand || '';
+            if (/Google Chrome|Chromium/i.test(b) && !/Edge|Opera|Brave/i.test(b)) {
+              hasChromiumBrand = true;
+              break;
             }
-          }
-
-          if (hasChromiumBrand || hasChromeObj || (isV8Engine && (hasPerfMemory || hasWebkitAppRegion))) {
-            return { detected: true, isChrome: true, reason: 'Using Chrome.' };
           }
         }
 
-        // Check 1: Known AI Model Training, Retrieval & Commercial Scraping Crawlers
+        // Check F: window.chrome host object
+        var hasChromeObj = typeof window.chrome === 'object' && window.chrome !== null;
+
+        // VERDICT FOR CHROME (Including Userscript Tamper Bypass Attempts):
+        // If it's not explicitly Edge/Opera/Brave, and it has Chrome UA OR Blink APIs OR V8 Stack OR Userscript Spoofing:
+        if (!isExplicitOther && !isBrave) {
+          if (hasChromeUA || hasChromiumBrand || hasChromeObj) {
+            return { detected: true, isChrome: true, reason: 'Using Chrome.' };
+          }
+          // If a userscript spoofed UA to Firefox/Safari, but V8 stack + Blink APIs reveal Chromium engine:
+          if ((isUASpoofed || hasV8Stack) && hasBlinkAPIs) {
+            return { detected: true, isChrome: true, reason: 'Using Chrome (Userscript Spoofed).' };
+          }
+        }
+
+        // Check G: Known AI Model Training, Retrieval & Commercial Scraping Crawlers
         var aiCrawlerPattern = /GPTBot|ChatGPT-User|OAI-SearchBot|ClaudeBot|Claude-User|anthropic-ai|Google-Extended|Bytespider|CCBot|PerplexityBot|Meta-ExternalAgent|Applebot-Extended|Amazonbot|cohere-ai|YouBot|Diffbot|FacebookBot|omgilibot|Scrapy|curl|Wget|python-requests|aiohttp|Go-http-client|HeadlessChrome|PhantomJS|Splash|Selenium|Puppeteer/i;
         if (aiCrawlerPattern.test(ua)) {
           return { detected: true, isChrome: false, reason: 'Automated AI Crawler or Scraping Activity.' };
         }
 
-        // Check 2: Headless Automation API (WebDriver)
+        // Check H: Headless Automation API (WebDriver)
         if (navigator.webdriver === true) {
           return { detected: true, isChrome: false, reason: 'Automated AI Crawler or Scraping Activity.' };
         }
 
-        // Check 3: Headless & Automation Runtime Artifacts
+        // Check I: Headless & Automation Runtime Artifacts
         var automationArtifacts = [
           '__puppeteer_evaluation_script__',
           '__playwright',
@@ -2948,14 +2992,14 @@ Line-wrap Delta: 0px across all 18 weights</div>
           'domAutomation',
           'domAutomationController'
         ];
-        for (var i = 0; i < automationArtifacts.length; i++) {
-          var prop = automationArtifacts[i];
+        for (var j = 0; j < automationArtifacts.length; j++) {
+          var prop = automationArtifacts[j];
           if (window[prop] !== undefined || document[prop] !== undefined) {
             return { detected: true, isChrome: false, reason: 'Automated AI Crawler or Scraping Activity.' };
           }
         }
 
-        // Check 4: Headless Chromium Fingerprint Inconsistencies
+        // Check J: Headless Chromium Fingerprint Inconsistencies
         var isMobile = /Mobile|Android|iPhone|iPad|iPod/i.test(ua);
         var isDesktop = !isMobile;
 
@@ -3007,6 +3051,41 @@ Line-wrap Delta: 0px across all 18 weights</div>
         if (dotsEl) dotsEl.textContent = '.'.repeat(dotCount);
       }, 350);
 
+      // 4. Fail-Closed DOM Purge Function
+      // Destroys the portfolio elements from JavaScript memory completely!
+      // If a userscript removes #cfErrorBlock or clears CSS, there is literally nothing left to view.
+      function purgePortfolioDOM() {
+        var selectors = ['nav', 'header', 'main', 'footer', '.theme-dock', '.glass-pill-dock', '.scroll-progress-rail', '#ambientCanvas'];
+        selectors.forEach(function(sel) {
+          var els = document.querySelectorAll(sel);
+          els.forEach(function(el) {
+            if (el && el.parentNode) el.parentNode.removeChild(el);
+          });
+        });
+      }
+
+      // 5. Anti-Tamper Watchdog (Active MutationObserver + Polling)
+      // Re-asserts the block if a userscript tampers with DOM or style attributes
+      function armWatchdog() {
+        var observer = new MutationObserver(function() {
+          if (!document.documentElement.classList.contains('is-chrome-blocked')) {
+            document.documentElement.className = 'is-chrome-blocked';
+          }
+          if (cfError && cfError.style.display !== 'block') {
+            cfError.style.display = 'block';
+          }
+          purgePortfolioDOM();
+        });
+        observer.observe(document.documentElement, { attributes: true, childList: true, subtree: true });
+
+        setInterval(function() {
+          if (!document.documentElement.classList.contains('is-chrome-blocked')) {
+            document.documentElement.className = 'is-chrome-blocked';
+          }
+          purgePortfolioDOM();
+        }, 300);
+      }
+
       function frame(now) {
         var elapsed = now - startTime;
         var progress = Math.min(elapsed / duration, 1);
@@ -3032,13 +3111,19 @@ Line-wrap Delta: 0px across all 18 weights</div>
                 cfTextEl.textContent = 'The owner of this website (jabirking-ux) has banned you for "' + reasonText + '"';
               }
 
-              // Block with Error 1006
+              // Instant Fail-Closed DOM Purge
+              purgePortfolioDOM();
+
+              // Display Error 1006
               document.documentElement.className = 'is-chrome-blocked';
               if (botScreen) botScreen.style.display = 'none';
               if (cfError) {
                 cfError.style.display = 'block';
                 document.body.style.background = '#ffffff';
               }
+
+              // Arm watchdog against live userscript DOM tampering
+              armWatchdog();
             } else {
               // Verified (Non-Chrome or Bypassed): reveal portfolio cleanly
               if (calcEl) calcEl.textContent = 'Verification successful!';
